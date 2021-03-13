@@ -10,7 +10,7 @@ import chainer
 from chainer import cuda
 import chainer.functions as F
 import chainer.links
-from chainer.functions import caffe
+from chainer.links import caffe
 from chainer import Variable, optimizers
 
 from models import *
@@ -97,8 +97,9 @@ class Clip(chainer.Function):
         return ret
 
 def generate_image(img_orig, img_style, width, nw, nh, max_iter, lr, img_gen=None):
-    mid_orig = nn.forward(Variable(img_orig, volatile=True))
-    style_mats = [get_matrix(y) for y in nn.forward(Variable(img_style, volatile=True))]
+    with chainer.using_config('enable_backprop', False):
+        mid_orig = nn.forward(Variable(img_orig))
+        style_mats = [get_matrix(y) for y in nn.forward(Variable(img_style))]
 
     if img_gen is None:
         if args.gpu >= 0:
